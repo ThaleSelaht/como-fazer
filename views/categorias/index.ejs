@@ -7,8 +7,9 @@
   <title>Document</title>
 </head>
 <body>
+  <a href="/categorias/nova">Nova Categoria</a> <br>
   <% categorias.forEach(categoria => { %>
-    <%= categoria.categoria %> <br>
+    <%= categoria.categoria %> <a href="/categorias/excluir/<%= categoria.id %>"> Excluir </a> <br>
   <% }) %>
 </body>
 </html>

@@ -21,14 +21,37 @@ const adicionarCategoria = async (req, res) => {
   await axios.post('https://como-fazer-tj.firebaseio.com/categorias.json', {
     'categoria': req.body.categoria
   })
+  res.redirect('/categorias')
 }
 const listarCategorias = async (req, res) => {
   const content = await axios.get('https://como-fazer-tj.firebaseio.com/categorias.json')
-  const categorias = Object.keys(content.data).map(key => content.data[key])
+  if (content.data) {
+    const categorias = Object.keys(content.data).map(key => {
+      return {
+        id: key,
+        ...content.data[key]
+      }
+    })
+    res.render('categorias/index', { categorias: categorias })
+  } else {
+    res.render('categorias/index', { categorias: [] })
+  }
+  const categorias = Object.keys(content.data).map(key => {
+    return {
+      id: key,
+      ...content.data[key]
+    }
+  })
   res.render('categorias/index', { categorias: categorias })
+}
+
+const excluirCategoria = async (req, res) => {
+  await axios.delete(`https://como-fazer-tj.firebaseio.com/categorias/${req.params.id}.json`)
+  res.redirect('/categorias')
 }
 app.get('/', resolver)
 app.get('/categorias', listarCategorias)
+app.get('/categorias/excluir/:id', excluirCategoria)
 app.get('/categorias/nova', novaCategoria)
 app.post('/categorias/nova', adicionarCategoria)
 
