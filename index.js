@@ -36,24 +36,38 @@ const listarCategorias = async (req, res) => {
   } else {
     res.render('categorias/index', { categorias: [] })
   }
-  const categorias = Object.keys(content.data).map(key => {
-    return {
-      id: key,
-      ...content.data[key]
-    }
-  })
-  res.render('categorias/index', { categorias: categorias })
 }
 
 const excluirCategoria = async (req, res) => {
   await axios.delete(`https://como-fazer-tj.firebaseio.com/categorias/${req.params.id}.json`)
   res.redirect('/categorias')
 }
+
+const editarCategoria = async (req, res) => {
+  const content = await axios.get(`https://como-fazer-tj.firebaseio.com/categorias/${req.params.id}.json`)
+  res.render('categorias/editar', {
+    categoria: {
+      id: req.params.id,
+      ...content.data
+    }
+  })
+}
+
+const modificarCategoria = async (req, res) => {
+  await axios.put(`https://como-fazer-tj.firebaseio.com/categorias/${req.params.id}.json`, {
+    categoria: req.body.categoria
+  })
+  res.redirect('/categorias')
+}
+
 app.get('/', resolver)
 app.get('/categorias', listarCategorias)
-app.get('/categorias/excluir/:id', excluirCategoria)
 app.get('/categorias/nova', novaCategoria)
+app.get('/categorias/editar/:id', editarCategoria)
+app.get('/categorias/excluir/:id', excluirCategoria)
+
 app.post('/categorias/nova', adicionarCategoria)
+app.post('/categorias/editar/:id', modificarCategoria)
 
 app.listen(port, (err) => {
   if (err) {
