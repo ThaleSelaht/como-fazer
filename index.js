@@ -1,7 +1,8 @@
 const express = require('express')
 const app = express()
-const axios = require('axios')
 const bodyParser = require('body-parser')
+const axios = require('axios')
+const api = require('./api')
 
 app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded())
@@ -18,20 +19,14 @@ const novaCategoria = (req, res) => {
   res.render('categorias/nova')
 }
 const adicionarCategoria = async (req, res) => {
-  await axios.post('https://como-fazer-tj.firebaseio.com/categorias.json', {
+  await api.create('categorias', {
     'categoria': req.body.categoria
   })
   res.redirect('/categorias')
 }
 const listarCategorias = async (req, res) => {
-  const content = await axios.get('https://como-fazer-tj.firebaseio.com/categorias.json')
-  if (content.data) {
-    const categorias = Object.keys(content.data).map(key => {
-      return {
-        id: key,
-        ...content.data[key]
-      }
-    })
+  const categorias = await api.listar('categorias')
+  if (categorias) {
     res.render('categorias/index', { categorias: categorias })
   } else {
     res.render('categorias/index', { categorias: [] })
@@ -39,22 +34,19 @@ const listarCategorias = async (req, res) => {
 }
 
 const excluirCategoria = async (req, res) => {
-  await axios.delete(`https://como-fazer-tj.firebaseio.com/categorias/${req.params.id}.json`)
+  await api.apagar('categorias', req.params.id)
   res.redirect('/categorias')
 }
 
 const editarCategoria = async (req, res) => {
-  const content = await axios.get(`https://como-fazer-tj.firebaseio.com/categorias/${req.params.id}.json`)
+  const categoria = await api.get('categorias', req.params.id)
   res.render('categorias/editar', {
-    categoria: {
-      id: req.params.id,
-      ...content.data
-    }
+    categoria
   })
 }
 
 const modificarCategoria = async (req, res) => {
-  await axios.put(`https://como-fazer-tj.firebaseio.com/categorias/${req.params.id}.json`, {
+  await api.update('categorias', req.params.id, {
     categoria: req.body.categoria
   })
   res.redirect('/categorias')
